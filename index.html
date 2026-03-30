@@ -3167,18 +3167,43 @@ function enviarPedidoWhatsApp() {
   const obs = document.getElementById('obs-pedido').value.trim();
 
   let linhas = '*🛒 NOVO PEDIDO — Além das Fronteiras Método*\n\n';
-  linhas += '*Itens do pedido:*\n';
   let total = 0;
+  let numItem = 1;
 
   carrinho.forEach(item => {
     const prod = produtos.find(p => p.id === item.id);
     if (!prod) return;
     const sub = prod.preco * item.qtd;
     total += sub;
-    linhas += `- ${prod.nome} x${item.qtd} — ${fmtBRL(sub)}\n`;
+
+    linhas += `*${numItem}. ${prod.nome}*`;
+    if (prod.usado) linhas += ` _(Usado)_`;
+    linhas += `\n`;
+
+    if (prod.descricao) linhas += `📄 ${prod.descricao}\n`;
+
+    if (prod.caracteristicas && prod.caracteristicas.length > 0) {
+      linhas += `📋 *Especificações:*\n`;
+      prod.caracteristicas.forEach(c => {
+        linhas += `   • ${c.chave}: ${c.valor}\n`;
+      });
+    }
+
+    if (item.qtd > 1) {
+      linhas += `🔢 Quantidade: ${item.qtd}x\n`;
+      linhas += `💵 Unitário: ${fmtBRL(prod.preco)}\n`;
+      linhas += `💰 Subtotal: ${fmtBRL(sub)}\n`;
+    } else {
+      linhas += `💰 Valor: ${fmtBRL(prod.preco)}\n`;
+    }
+
+    linhas += `\n`;
+    numItem++;
   });
 
-  linhas += `\n*💰 Total: ${fmtBRL(total)}*`;
+  linhas += `━━━━━━━━━━━━━━━━━━━━\n`;
+  linhas += `*💳 TOTAL DO PEDIDO: ${fmtBRL(total)}*\n`;
+  linhas += `━━━━━━━━━━━━━━━━━━━━`;
   if (obs) linhas += `\n\n*📝 Observações:* ${obs}`;
 
   const encoded = encodeURIComponent(linhas);
